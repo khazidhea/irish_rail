@@ -1,12 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="static/style.css">
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript" src="/static/latlong.js"></script>
+<script type="text/javascript" src="static/latlong.js"></script>
 </head>
-<body>
-<p id="demo">Click the button to get next 10 trains times on nearby stations:</p>
-<button id="test" onclick="get_trains()">Try It</button>
+<body onload="get_trains()">
+<h1>This page lists next 10 departing trains within 5km of your location.</h1>
+<h2>Make sure you allow access to your geolocation data.</h2>
+<table id="trains">
+
+	<!-- Table header -->
+	
+		<thead>
+			<tr>
+				<th scope="col">Departure time</th>
+				<th scope="col">Departs from</th>
+				<th scope="col">Destination</th>
+				<th scope="col">Traincode</th>
+			</tr>
+		</thead>
+
+	<!-- Table body -->
+	
+		<tbody>
+			
+		</tbody>
+
+</table>
 </body>
 <script>
 	var demo = $('#demo');
@@ -36,14 +57,14 @@
 				stations_nearby.push(station['StationCode']);
 			}
 		}
-		console.log(stations_nearby);
+		//console.log(stations_nearby);
 
 		var trains = [];
 		var counter = 0;
 		for (var i = 0; i < stations_nearby.length; ++i) {
 			var station_code = stations_nearby[i];
 			url = 'station/' + station_code;
-			console.log(url);
+			//console.log(url);
 			$.getJSON(url, function(data) {
 				counter++;
 				for (var j = 0; j < data.length; ++j) {
@@ -60,8 +81,22 @@
 	function process_trains(trains) {
 		trains.sort(sort_function);
 		trains = trains.slice(0, 10);
-		console.log(trains);
-		
+		//console.log(trains);
+		var table = $('#trains tbody');
+		for (var i = 0; i < trains.length; ++i) {
+			var train = trains[i];
+			var departure_time = '<td>' + train['Expdepart'] + '</td>';
+			var departs_from = '<td>' + train['Stationfullname'] + '</td>';
+			var destination = '<td>' + train['Destination'] + '</td>';
+			var train_code = '<td>' + train['Traincode'] + '</td>';
+			var row_data = departure_time + departs_from + destination + train_code;
+			var row = '<tr';
+			if (i%2 == 0) {
+				row += ' class="even"';
+			}
+			row += '>' + row_data + '</tr>';
+			table.append(row);
+		}
 	}
 
 	function sort_function(a, b) {
