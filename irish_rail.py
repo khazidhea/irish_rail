@@ -15,8 +15,13 @@ def serve_static(filename):
 def station(station_code):
 	xmlurl = 'http://api.irishrail.ie/realtime/realtime.asmx/getStationDataByCodeXML?StationCode=' + station_code
 	xml = urllib.urlopen(xmlurl)
-	station = xmltodict.parse(xml)['ArrayOfObjStationData']['objStationData']
-	return json.dumps(station)
+	station = xmltodict.parse(xml)
+	result = {'error':0}
+	try:
+		result['station_info'] = station['ArrayOfObjStationData']['objStationData']
+	except KeyError:
+		result['error'] ='Could not retrive station info for ' + station_code
+	return json.dumps(result)
 
 @app.route('/')
 def index():

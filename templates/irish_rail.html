@@ -62,16 +62,24 @@
 
 		var trains = [];
 		var counter = 0;
+		var expected_count = stations_nearby.length;
 		for (var i = 0; i < stations_nearby.length; ++i) {
 			var station_code = stations_nearby[i];
 			$.getJSON(station_code, function(data) {
-				counter++;
-				for (var j = 0; j < data.length; ++j) {
-					var train = data[j];
-					trains.push(train);
+				if (data['error'] == 0) {
+					data = data['station_info'];
+					counter++;
+					for (var j = 0; j < data.length; ++j) {
+						var train = data[j];
+						trains.push(train);
+					}
+					if (counter == expected_count) {
+						process_trains(trains);
+					}
 				}
-				if (counter == stations_nearby.length) {
-					process_trains(trains);
+				else {
+					console.log(data['error']);
+					--expected_count;
 				}
 			});
 		}
