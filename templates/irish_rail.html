@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="/static/latlong.js"></script>
+</head>
+<body>
+<p id="demo">Click the button to get next 10 trains times on nearby stations:</p>
+<button id="test" onclick="get_trains()">Try It</button>
+</body>
+<script>
+	var demo = $('#demo');
+	var stations = {{ stations |safe }};
+
+	function get_trains() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(process_position);
+		}
+		else {
+			demo.innerHTML='Geolocation is not supported by this browser.';
+		}
+	}
+
+	function process_position(position) {
+		var lat1 = position.coords.latitude;
+		var lon1 = position.coords.longitude;
+		var my_position = new LatLon(lat1, lon1);
+		var stations_nearby = [];
+		for (var i = 0; i < stations.length; ++i) {
+			var station = stations[i];
+			var lat2 = station['StationLatitude'];
+			var lon2 = station['StationLongitude'];
+			var station_position = new LatLon(lat2, lon2);
+			var distance = my_position.distanceTo(station_position);  
+			if (distance < 5) {
+				stations_nearby.push(station['StationCode']);
+			}
+		}
+		console.log(stations_nearby);
+
+		var trains = [];
+		var counter = 0;
+		for (var i = 0; i < stations_nearby.length; ++i) {
+			var station_code = stations_nearby[i];
+			url = 'station/' + station_code;
+			console.log(url);
+			$.getJSON(url, function(data) {
+				counter++;
+				for (var j = 0; j < data.length; ++j) {
+					var train = data[j];
+					trains.push(train);
+				}
+				if (counter == stations_nearby.length) {
+					process_trains(trains);
+				}
+			});
+		}
+	}
+
+	function process_trains(trains) {
+		trains.sort(sort_function);
+		trains = trains.slice(0, 10);
+		console.log(trains);
+		
+	}
+
+	function sort_function(a, b) {
+		var time1 = a['Expdepart'];
+		var time2 = b['Expdepart'];
+		if (time1 == '00:00') {
+			time1 = '25:00';
+		}
+		if (time2 == '00:00') {
+			time2 = '25:00';
+		}
+		if (time1 > time2) {
+			return 1;
+		}
+		else if (time1 < time2) {
+			return -1;
+		}
+		else {
+			return 0;
+		}
+	}
+</script>
+</html>
