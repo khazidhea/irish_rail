@@ -63,9 +63,7 @@
 		var counter = 0;
 		for (var i = 0; i < stations_nearby.length; ++i) {
 			var station_code = stations_nearby[i];
-			url = 'station/' + station_code;
-			//console.log(url);
-			$.getJSON(url, function(data) {
+			$.getJSON(station_code, function(data) {
 				counter++;
 				for (var j = 0; j < data.length; ++j) {
 					var train = data[j];

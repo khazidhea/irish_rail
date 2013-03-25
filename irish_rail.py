@@ -11,7 +11,7 @@ app = Flask(__name__)
 def serve_static(filename):
 	return send_file('static/' + filename)
 
-@app.route('/station/<station_code>')
+@app.route('/<station_code>')
 def station(station_code):
 	xmlurl = 'http://api.irishrail.ie/realtime/realtime.asmx/getStationDataByCodeXML?StationCode=' + station_code
 	xml = urllib.urlopen(xmlurl)
